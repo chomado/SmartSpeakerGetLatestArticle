@@ -56,7 +56,7 @@ namespace TechSummit2018.ServerlessSmartSpeaker
                 case "Default Welcome Intent":
                     webhookResponse.FulfillmentText = IntroductionMessage;
                     break;
-                case "AskNewestBlogTitleIntent":
+                case "AskLatestBlogTitleIntent":
                     webhookResponse.FulfillmentText = await CreateNewestBlogTitleMessageAsync();
                     break;
                 default:
