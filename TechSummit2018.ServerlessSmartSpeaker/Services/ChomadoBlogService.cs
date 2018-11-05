@@ -12,7 +12,7 @@ namespace TechSummit2018.ServerlessSmartSpeaker.Services
     {
         private static string ChomadoBlogRssUrl { get; } = "https://chomado.com/author/chomado/feed/";
         private static HttpClient HttpClient { get; } = new HttpClient();
-        public async Task<string> GetNewestBlogTitleAsync()
+        public async Task<string> GetLatestBlogTitleAsync()
         {
             var response = await HttpClient.GetAsync(ChomadoBlogRssUrl);
             if (!response.IsSuccessStatusCode)

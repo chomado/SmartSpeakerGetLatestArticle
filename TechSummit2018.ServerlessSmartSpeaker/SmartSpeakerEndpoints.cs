@@ -24,6 +24,9 @@ namespace TechSummit2018.ServerlessSmartSpeaker
     public static class SmartSpeakerEndpoints
     {
         private static string IntroductionMessage { get; } = "こんにちはテックサミット2018用のデモアプリです。最新記事を教えてと聞いてください。";
+        private static string HelloMessage { get; } = "こんにちは、ちょまどさん！";
+        private static string ErrorMessage { get; } = "すみません、わかりませんでした！";
+
         [FunctionName("Line")]
         public static async Task<IActionResult> Line([HttpTrigger(AuthorizationLevel.Function, "post", Route = null)]HttpRequest req, ILogger log)
         {
@@ -37,12 +40,13 @@ namespace TechSummit2018.ServerlessSmartSpeaker
                     cekResponse.ShouldEndSession = false;
                     break;
                 case RequestType.IntentRequest:
-                    cekResponse.AddText(await CreateNewestBlogTitleMessageAsync());
+                    cekResponse.AddText(await HandleIntentAsync(cekRequest.Request.Intent.Name));
                     break;
             }
 
             return new OkObjectResult(cekResponse);
         }
+
 
         [FunctionName("GoogleHome")]
         public static async Task<IActionResult> GoogleHome([HttpTrigger(AuthorizationLevel.Function, "post", Route = null)]HttpRequest req, ILogger log)
@@ -56,11 +60,8 @@ namespace TechSummit2018.ServerlessSmartSpeaker
                 case "Default Welcome Intent":
                     webhookResponse.FulfillmentText = IntroductionMessage;
                     break;
-                case "AskLatestBlogTitleIntent":
-                    webhookResponse.FulfillmentText = await CreateNewestBlogTitleMessageAsync();
-                    break;
                 default:
-                    webhookResponse.FulfillmentText = "すいません。わかりません。";
+                    webhookResponse.FulfillmentText = await HandleIntentAsync(webhookRequest.QueryResult.Intent.DisplayName);
                     break;
             }
 
@@ -87,7 +88,7 @@ namespace TechSummit2018.ServerlessSmartSpeaker
                 case IntentRequest ir:
                     skillResponse.Response.OutputSpeech = new PlainTextOutputSpeech
                     {
-                        Text = await CreateNewestBlogTitleMessageAsync(),
+                        Text = await HandleIntentAsync(ir.Intent.Name),
                     };
                     break;
                 default:
@@ -101,18 +102,30 @@ namespace TechSummit2018.ServerlessSmartSpeaker
             return new OkObjectResult(skillResponse);
         }
 
-        private static async Task<string> CreateNewestBlogTitleMessageAsync()
+        private static async Task<string> HandleIntentAsync(string intent)
         {
-            var chomadoBlogService = new ChomadoBlogService();
-            var title = await chomadoBlogService.GetNewestBlogTitleAsync();
-            if (!string.IsNullOrEmpty(title))
+            switch (intent)
             {
-                return $"ちょまどさんのブログの最新記事は {title} です。";
+                case "HelloIntent":
+                    return HelloMessage;
+                case "AskLatestBlogTitleIntent":
+                    {
+                        var chomadoBlogService = new ChomadoBlogService();
+                        var title = await chomadoBlogService.GetLatestBlogTitleAsync();
+
+                        if (!string.IsNullOrEmpty(title))
+                        {
+                            return $"ちょまどさんのブログの最新記事は {title} です。";
+                        }
+                        else
+                        {
+                            return "ちょまどさんのブログの最新記事は、わかりませんでした。";
+                        }
+                    }
+                default:
+                    return ErrorMessage;
             }
-            else
-            {
-                return "ちょまどさんのブログの最新記事は、わかりませんでした。";
-            }
+            
         }
     }
 }
