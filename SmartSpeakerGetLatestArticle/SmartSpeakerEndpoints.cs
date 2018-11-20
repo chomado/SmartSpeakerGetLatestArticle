@@ -18,6 +18,9 @@ using Google.Protobuf.WellKnownTypes;
 using Alexa.NET.Request;
 using Alexa.NET.Request.Type;
 using Alexa.NET.Response;
+using Line.Messaging;
+using System.Collections.Generic;
+using SmartSpeakerGetLatestArticle.Models;
 
 namespace TechSummit2018.ServerlessSmartSpeaker
 {
@@ -40,7 +43,25 @@ namespace TechSummit2018.ServerlessSmartSpeaker
                     cekResponse.ShouldEndSession = false;
                     break;
                 case RequestType.IntentRequest:
-                    cekResponse.AddText(await HandleIntentAsync(cekRequest.Request.Intent.Name));
+                    {
+                        var r = await HandleIntentAsync(cekRequest.Request.Intent.Name);
+                        cekResponse.AddText(r.ResponseMessage);
+
+                        if (r.Blog != null)
+                        {
+                            // 最新記事が見つかったので LINE にプッシュ通知する
+                            string secret = "";
+                            var messagingClient = new LineMessagingClient(secret);
+                            await messagingClient.PushMessageAsync(
+                                to: cekRequest.Session.User.UserId,
+                                messages: new List<ISendMessage>
+                                {
+                                    new TextMessage($"ちょまどさんの最新記事はこちら！"),
+                                    new TextMessage($@"タイトル『{r.Blog.Title}』
+{r.Blog.Url}"),
+                                });
+                        }
+                    }
                     break;
             }
 
@@ -61,7 +82,10 @@ namespace TechSummit2018.ServerlessSmartSpeaker
                     webhookResponse.FulfillmentText = IntroductionMessage;
                     break;
                 default:
-                    webhookResponse.FulfillmentText = await HandleIntentAsync(webhookRequest.QueryResult.Intent.DisplayName);
+                    {
+                        var r = await HandleIntentAsync(webhookRequest.QueryResult.Intent.DisplayName);
+                        webhookResponse.FulfillmentText = r.ResponseMessage;
+                    }
                     break;
             }
 
@@ -86,10 +110,13 @@ namespace TechSummit2018.ServerlessSmartSpeaker
                     };
                     break;
                 case IntentRequest ir:
-                    skillResponse.Response.OutputSpeech = new PlainTextOutputSpeech
                     {
-                        Text = await HandleIntentAsync(ir.Intent.Name),
-                    };
+                        var r = await HandleIntentAsync(ir.Intent.Name);
+                        skillResponse.Response.OutputSpeech = new PlainTextOutputSpeech
+                        {
+                            Text = r.ResponseMessage,
+                        };
+                    }
                     break;
                 default:
                     skillResponse.Response.OutputSpeech = new PlainTextOutputSpeech
@@ -102,28 +129,38 @@ namespace TechSummit2018.ServerlessSmartSpeaker
             return new OkObjectResult(skillResponse);
         }
 
-        private static async Task<string> HandleIntentAsync(string intent)
+        private static async Task<HandleIntentResult> HandleIntentAsync(string intent)
         {
             switch (intent)
             {
                 case "HelloIntent":
-                    return HelloMessage;
+                    return new HandleIntentResult { ResponseMessage = HelloMessage };
                 case "AskLatestBlogTitleIntent":
                     {
                         var chomadoBlogService = new ChomadoBlogService();
-                        var title = await chomadoBlogService.GetLatestBlogTitleAsync();
+                        var blog = await chomadoBlogService.GetLatestBlogAsync();
 
-                        if (!string.IsNullOrEmpty(title))
+                        if (blog != null)
                         {
-                            return $"ちょまどさんのブログの最新記事は {title} です。";
+                            return new HandleIntentResult
+                            {
+                                ResponseMessage = $"ちょまどさんのブログの最新記事は {blog.Title} です。",
+                                Blog = blog,
+                            };
                         }
                         else
                         {
-                            return "ちょまどさんのブログの最新記事は、わかりませんでした。";
+                            return new HandleIntentResult
+                            {
+                                ResponseMessage = "ちょまどさんのブログの最新記事は、わかりませんでした。",
+                            };
                         }
                     }
                 default:
-                    return ErrorMessage;
+                    return new HandleIntentResult
+                    {
+                        ResponseMessage = ErrorMessage,
+                    };
             }
             
         }
