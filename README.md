@@ -12,6 +12,11 @@
 1. スマートスピーカー（LINE Clova/ Google Home/ Amazon Alexa) が、そのタイトルを読み上げてくれる
 1. LINE にメッセージも送ってくれる (LINE Clova の時のみ)
 
+↓ CLova の持ち主に LINE も送ってくれる 
+
+![LINE Clova スキル開発 と push 通知](image/pushLine.jpg)
+
+
 ## アーキテクチャ
 
 ![スマートスピーカースキル開発](image/demo01.jpg)
