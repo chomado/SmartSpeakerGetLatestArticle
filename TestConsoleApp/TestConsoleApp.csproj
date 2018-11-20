@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\TechSummit2018.ServerlessSmartSpeaker\TechSummit2018.ServerlessSmartSpeaker.csproj" />
+    <ProjectReference Include="..\SmartSpeakerGetLatestArticle\SmartSpeakerGetLatestArticle.csproj" />
   </ItemGroup>
 
 </Project>
