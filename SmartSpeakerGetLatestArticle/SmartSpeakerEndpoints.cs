@@ -23,7 +23,7 @@ namespace TechSummit2018.ServerlessSmartSpeaker
 {
     public static class SmartSpeakerEndpoints
     {
-        private static string IntroductionMessage { get; } = "こんにちはテックサミット2018用のデモアプリです。最新記事を教えてと聞いてください。";
+        private static string IntroductionMessage { get; } = "こんにちは、LINEデベロッパー・デイのデモアプリです。最新記事を教えてと聞いてください。";
         private static string HelloMessage { get; } = "こんにちは、ちょまどさん！";
         private static string ErrorMessage { get; } = "すみません、わかりませんでした！";
 
