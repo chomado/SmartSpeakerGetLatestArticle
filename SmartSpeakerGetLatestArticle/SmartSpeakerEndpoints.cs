@@ -8,6 +8,7 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using CEK.CSharp;
 using CEK.CSharp.Models;
@@ -31,7 +32,7 @@ namespace TechSummit2018.ServerlessSmartSpeaker
         private static string ErrorMessage { get; } = "すみません、わかりませんでした！";
 
         [FunctionName("Line")]
-        public static async Task<IActionResult> Line([HttpTrigger(AuthorizationLevel.Function, "post", Route = null)]HttpRequest req, ILogger log)
+        public static async Task<IActionResult> Line([HttpTrigger(AuthorizationLevel.Function, "post", Route = null)]HttpRequest req, ExecutionContext context, ILogger log)
         {
             var client = new ClovaClient();
             var cekRequest = await client.GetRequest(req.Headers["SignatureCEK"], req.Body);
@@ -47,10 +48,17 @@ namespace TechSummit2018.ServerlessSmartSpeaker
                         var r = await HandleIntentAsync(cekRequest.Request.Intent.Name);
                         cekResponse.AddText(r.ResponseMessage);
 
+                        // 最新記事が見つかったので LINE にプッシュ通知する
                         if (r.Blog != null)
                         {
-                            // 最新記事が見つかったので LINE にプッシュ通知する
-                            string secret = "";
+                            var config = new ConfigurationBuilder()
+                                .SetBasePath(context.FunctionAppDirectory)
+                                .AddJsonFile("local.settings.json", true)
+                                .AddEnvironmentVariables()
+                                .Build();
+
+                            var secret = config.GetValue<string>("LineMessagingApiSecret");
+
                             var messagingClient = new LineMessagingClient(secret);
                             await messagingClient.PushMessageAsync(
                                 to: cekRequest.Session.User.UserId,
@@ -162,7 +170,7 @@ namespace TechSummit2018.ServerlessSmartSpeaker
                         ResponseMessage = ErrorMessage,
                     };
             }
-            
+
         }
     }
 }
