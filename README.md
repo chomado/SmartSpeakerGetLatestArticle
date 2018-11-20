@@ -20,3 +20,10 @@
 ## アーキテクチャ
 
 ![スマートスピーカースキル開発](image/demo01.jpg)
+
+## 使用したもの
+
+* LINE Clova Extensions Kit (CEK)
+* LINE Messaging API
+* [Microsoft Azure Functions](https://docs.microsoft.com/ja-jp/azure/azure-functions/) という、マイクロソフトのサーバーレスのサービス
+* [LINE.Messaging](https://github.com/pierre3/LineMessagingApi) という、C# で LINE Messaging API を使うためのライブラリ
