@@ -2,6 +2,8 @@
 
 ＊ ストアには提出していないので、ストアで検索しても無いです
 
+(git clone したらやること→ [その1](https://twitter.com/chomado/status/1066737480672542720), [その2](https://twitter.com/chomado/status/1066738977871343616))
+
 スマートスピーカーで [ちょまどブログ](https://chomado.com/author/chomado/)の最新記事を取ってきてくれる
 
 ![スマートスピーカースキル開発](image/howItWorks/03.JPG)
