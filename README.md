@@ -27,5 +27,5 @@
 
 * LINE Clova Extensions Kit (CEK)
 * LINE Messaging API
-* [Microsoft Azure Functions](https://docs.microsoft.com/ja-jp/azure/azure-functions/) という、マイクロソフトのサーバーレスのサービス
+* [Microsoft Azure Functions](https://docs.microsoft.com/azure/azure-functions/?WT.mc_id=dotnet-0000-machiy) という、マイクロソフトのサーバーレスのサービス
 * [LINE.Messaging](https://github.com/pierre3/LineMessagingApi) という、C# で LINE Messaging API を使うためのライブラリ
